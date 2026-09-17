@@ -1,0 +1,48 @@
+# ==============================
+# NEXUS AI — Root .gitignore
+# ==============================
+
+# Python / Backend
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.env
+backend/*.db
+backend/chats.db
+backend/nexus_data.db
+backend/faiss_db/
+backend/chroma_db/
+backend/uploads/
+backend/*.pkl
+backend/venv/
+backend/.venv/
+backend/env/
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/.pytest_cache/
+backend/logs/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/coverage/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Misc
+*.log
+*.tmp
+.cache/

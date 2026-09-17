@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: nexus-ai-backend
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: GROQ_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: ./nexus_data.db
+      - key: FAISS_PATH
+        value: ./faiss_db
+      - key: UPLOAD_PATH
+        value: ./uploads
+    disk:
+      name: nexus-data
+      mountPath: /data
+      sizeGB: 10

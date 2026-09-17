@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-nexus-900 text-slate-100 antialiased selection:bg-primary-500/30 selection:text-primary-200;
+  }
+}
+
+/* Custom Cyber Emerald Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #27484B;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #10B981;
+}
+
+/* Katex Math Overrides for Dark Mode */
+.katex-display {
+  margin: 0.75em 0 !important;
+  padding: 0.75em 1em;
+  background: rgba(14, 28, 29, 0.75);
+  border: 1px solid rgba(39, 72, 75, 0.6);
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.katex {
+  font-size: 1.05em !important;
+  color: #6EE7B7;
+}
