@@ -12,6 +12,7 @@ from typing import List, Optional, Dict, Any
 
 from fastapi import FastAPI, UploadFile, File, Form, Query, HTTPException, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -21,7 +22,6 @@ from loguru import logger
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-
 from embeddings import process_and_index_file, get_vector_store
 from rag import ask_rag, ask_rag_stream, generate_ai_image_url, generate_smart_title, SUPPORTED_MODELS, DEFAULT_MODEL
 from auth import create_access_token, verify_token
@@ -42,13 +42,27 @@ logger.add(
 # Rate limiter configuration
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="NEXUS AI Enterprise SaaS Backend", version="2.5.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://ai-scientific-rag-document-analyzer-e9xg8ln71.vercel.app",
+        "https://ai-scientific-rag-document-analyzer-7wlrnbi75.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+ )
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 DB_PATH = os.getenv("DATABASE_PATH", "./nexus_data.db")
 UPLOAD_DIR = os.getenv("UPLOAD_PATH", "./uploads")
+FAISS_DIR = os.getenv("FAISS_PATH", "./faiss_db")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs("faiss_db", exist_ok=True)
+os.makedirs(FAISS_DIR, exist_ok=True)
 
 # Mount static uploads directory for document preview
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
