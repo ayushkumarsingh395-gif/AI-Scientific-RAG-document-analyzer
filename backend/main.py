@@ -50,10 +50,13 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
     ],
+    allow_origin_regex=r"https://ai-scientific-rag-document-analyzer-[a-z0-9]+\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
  )
+
+
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
