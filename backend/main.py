@@ -77,11 +77,11 @@ origins = [o.strip() for o in cors_env.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://ai-scientific-rag-document-analyzer.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 def get_db():
     max_retries = 5
     retry_delay = 0.2
