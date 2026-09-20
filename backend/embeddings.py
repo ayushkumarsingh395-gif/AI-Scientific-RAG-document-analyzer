@@ -17,7 +17,6 @@ _embedding_instance = None
 
 HF_MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
 HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL_ID}/pipeline/feature-extraction"
-
 class LocalEmbeddings:
     """
     Uses Hugging Face's hosted Inference API instead of loading the model
