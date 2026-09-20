@@ -1,9 +1,11 @@
 import patch_env  # noqa: F401
 import os
+import time
 import pickle
 import traceback
 from typing import List, Optional
 import numpy as np
+import requests
 import pypdf
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -13,23 +15,62 @@ load_dotenv()
 
 _embedding_instance = None
 
+HF_MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
+HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_MODEL_ID}"
+
 class LocalEmbeddings:
+    """
+    Uses Hugging Face's hosted Inference API instead of loading the model
+    locally, so no heavy model/PyTorch is loaded into RAM on the server.
+    """
     def __init__(self):
-        from sentence_transformers import SentenceTransformer
-        hf_token = os.getenv("HF_TOKEN")
-        self.model = SentenceTransformer("all-MiniLM-L6-v2", token=hf_token)
+        self.hf_token = os.getenv("HF_TOKEN")
+        if not self.hf_token:
+            raise RuntimeError("HF_TOKEN is not set. Required for embeddings via Hugging Face Inference API.")
+        self.headers = {"Authorization": f"Bearer {self.hf_token}"}
+
+    def _call_api(self, texts: List[str], max_retries: int = 4) -> List[List[float]]:
+        payload = {"inputs": texts, "options": {"wait_for_model": True}}
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(HF_API_URL, headers=self.headers, json=payload, timeout=60)
+                if response.status_code == 200:
+                    data = response.json()
+                    # Some models return token-level embeddings (3D); mean-pool if so.
+                    result = []
+                    for item in data:
+                        arr = np.array(item)
+                        if arr.ndim == 2:
+                            arr = arr.mean(axis=0)
+                        result.append(arr.tolist())
+                    return result
+                elif response.status_code == 503:
+                    # Model is loading on HF's side, wait and retry
+                    time.sleep(3)
+                    continue
+                else:
+                    raise RuntimeError(f"HF Inference API error {response.status_code}: {response.text[:300]}")
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries - 1:
+                    raise RuntimeError(f"Failed to reach HF Inference API: {e}")
+                time.sleep(2)
+        raise RuntimeError("HF Inference API did not respond after retries.")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         if not texts:
             return []
-        embeddings = self.model.encode(texts, show_progress_bar=False)
-        return embeddings.tolist()
+        # Batch to avoid overly large single requests
+        batch_size = 32
+        all_embeddings = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            all_embeddings.extend(self._call_api(batch))
+        return all_embeddings
 
     def embed_query(self, text: str) -> List[float]:
         if not text:
             return []
-        embedding = self.model.encode([text], show_progress_bar=False)[0]
-        return embedding.tolist()
+        return self._call_api([text])[0]
 
 def get_embeddings():
     global _embedding_instance
