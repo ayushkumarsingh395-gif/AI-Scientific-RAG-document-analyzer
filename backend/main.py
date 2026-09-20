@@ -193,6 +193,11 @@ def init_db():
         conn.close()
 
 init_db()
+from embeddings import get_embeddings
+
+logger.info("Preloading embedding model...")
+get_embeddings()
+logger.info("Embedding model ready.")
 
 # Request/Response Models
 class SignupData(BaseModel):
