@@ -16,7 +16,7 @@ load_dotenv()
 _embedding_instance = None
 
 HF_MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
-HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_MODEL_ID}"
+HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL_ID}/pipeline/feature-extraction"
 
 class LocalEmbeddings:
     """
